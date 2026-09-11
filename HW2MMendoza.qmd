@@ -1,0 +1,71 @@
+---
+title: "HW2"
+author: "MMendoza"
+format: pdf
+editor: visual
+---
+
+**Q1.0**
+
+Two techniques for local error control that do not hinder a study’s representative-ness are Clocking and ANCOVA. Blocking creates homogeneous blocks which causes the response of treatment effect to be more sensitivem as well as alowing the combining of analyses to account for variations between each unit.
+
+**Q2.0**
+
+The Inaccuracy of the stopwatch timing is a measurement error/response error. Treatment application errors occur during the implementation of the experimental conditions, where the stopwatch on the iPhone occurs during data collection after the flight has occurred.
+
+**Q3.1**
+
+x1j = {1.158, 1.128, 1.140, 1.122, 1.128}\
+x2j = {1.686, 1.740, 1.740}\
+x3j = {2.328, 2.340, 2.298, 2.328, 2.340}
+
+x4j = {2.982, 2.868}
+
+x5j = {3.540, 3.480, 3.510, 3.504, 3.612}
+
+**Q3.2**
+
+```{r}
+# create design plan framework
+design.plan<-data.frame(
+  RPM=c("1","2","3","4","5"),
+  r  =c(5,3,5,2,5)
+)
+design.plan
+
+# assign/derive necessary parameters
+N  <- sum(design.plan$r) #Number of EUs = sum of r's
+
+set.seed(123) #for reproducibility of sample function
+
+# creates data table of random permutations from 1 to N 
+dat<-data.frame(
+  EU=sample(1:N) 
+)
+dat
+
+# create/factor RPM
+dat$RPM<-rep(design.plan$RPM, times=design.plan$r)
+dat$RPM<-as.factor(dat$RPM)
+dat
+dat$RPM
+
+#Sort by EU if desired
+dat <- dat %>% arrange(EU)
+dat
+
+#Verify trt replication count
+xtabs(~RPM,data=dat)
+```
+
+**Q3.3**
+
+Done on Written part of Assignment
+
+**Q4.1**
+
+Done on Written part of Assignment
+
+**Q4.2**
+
+Done on Written part of Assignment
