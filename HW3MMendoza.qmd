@@ -4,23 +4,61 @@ format: pdf
 editor: visual
 ---
 
-## Quarto
+# Q2
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+## 2.a)
 
 ```{r}
-1 + 1
+#create dataframe of table 3.2
+rpm <- c(150, 50, 50, 75, 150, 150, 100, 100, 100, 125, 
+         100, 50, 125, 150, 100, 75, 50, 50, 150, 75)
+level <- factor(c(5, 1, 1, 2, 5, 5, 3, 3, 3, 4, 
+                  3, 1, 4, 5, 3, 2, 1, 1, 5, 2))
+liters_minute <- c(3.540, 1.158, 1.128, 1.686, 3.480, 3.510, 
+                   2.328, 2.340, 2.298, 2.982, 2.328, 1.140, 
+                   2.868, 3.504, 2.340, 1.740, 1.122, 1.128, 
+                   3.612, 1.740)
+
+hl_data <- data.frame(rpm, level, liters_minute)
+print(hl_data)
+
+#aov to create anova table
+aov_rslt <- aov(liters_minute ~ level, hl_data)
+print(aov_rslt)
+
+#anova to create anova table
+anova_rslt <- anova(aov_rslt)
+print(anova_rslt)
 ```
 
-You can add options to executable code like this
+## 2.b)
+
+If the null hypothesis is correct, the test statistic follows an F-distribution with 4 numerator and 15 denominator degrees of freedom. (k = 5 factor levels, N = 20 observations, df1 = k - 1 = 4, N - k = 20 - 5 = 15)
 
 ```{r}
-#| echo: false
-2 * 2
+#use pf to verify p-value shown in anova table (2.2e^-16)
+df1 <- 4
+df2 <- 15
+f_stat <- anova_rslt$`F value`[[1]]
+
+p_stat <- pf(f_stat, df1, df2, lower.tail=FALSE)
+print(p_stat)
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+## 2.c)
+
+```{r}
+#create F_alpha with desired alpha level
+df1 <- 4
+df2 <- 15
+alpha <- 0.01
+
+F_alpha <- qf( alpha, df1, df2, lower.tail=FALSE)
+print(F_alpha)
+```
+
+Since the calculated F = 4.89321 \< F_anova = 2901.6, We reject the null hypothesis. There is enough evidence to reject H_0 in favor of H_1 at a significance level of 0.01.
+
+# Q3
+
+## 3.a)
