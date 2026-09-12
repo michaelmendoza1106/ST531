@@ -4,6 +4,12 @@ format: pdf
 editor: visual
 ---
 
+# Preliminary Requirements
+
+```{r}
+library(pwr)
+```
+
 # Q2
 
 ## 2.a)
@@ -53,7 +59,7 @@ df1 <- 4
 df2 <- 15
 alpha <- 0.01
 
-F_alpha <- qf( alpha, df1, df2, lower.tail=FALSE)
+F_alpha <- qf( 1 - alpha, df1, df2, lower.tail=FALSE)
 print(F_alpha)
 ```
 
@@ -62,3 +68,30 @@ Since the calculated F = 4.89321 \< F_anova = 2901.6, We reject the null hypothe
 # Q3
 
 ## 3.a)
+
+```{r}
+#trial and error r values until it works (r=7)
+delta<-2
+t    <-5
+r    <-7
+alpha<-0.05
+
+#df vars
+df1 <- t - 1
+df2 <- t * (r - 1)
+
+#calculate noncentrality parameter
+ncp <- r * (2^2) / 2
+
+#First do the manual calculation
+#Critical value under H0
+F_alpha <- qf(alpha, df1, df2, lower.tail=FALSE)
+
+#Power under H1 using critical value under H0
+power <- pf( F_alpha, df1 , df2, ncp = ncp, lower.tail=FALSE)
+print(power)
+
+#Verify calculation using pwr.anova.test
+f<-sqrt(2)
+pwr.anova.test(k=t,n=r,f=f,sig.level=alpha)
+```
