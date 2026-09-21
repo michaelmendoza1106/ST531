@@ -46,8 +46,44 @@ names(anova_rslt)
 rpm_emms <- emmeans(aov_rslt, ~ level)
 
 # Define the custom contrast vector 
-contrast1 <- contrast(rpm_emms, method = list("RPM 150 vs 50" = c(-1, 0, 0, 0, 1)))
+contrast1 <- contrast(rpm_emms, method = list("r5 minus r1" = c(-1, 0, 0, 0, 1)))
 
 # Extract the test results along with the 95% confidence interval
 summary(contrast1, infer = TRUE, level = 0.95)
+
+# estimate = 2.39
+# standard error = 0.0236
+#𝑝-value = <0.0001
+# confidence interval = [2.34, 2.44]
+```
+
+# Q2
+
+```{r}
+# create contrast list
+contrasts <- list(
+  "r2_minus_r1" = c(-1,  1,  0,  0,  0),
+  "r5_minus_r4" = c( 0,  0,  0, -1,  1)
+)
+
+# Contrast Results
+contrast2 <- contrast(rpm_emms, method = contrasts)
+print(contrast2)
+
+# Test Null hypothosis
+test_rslt <- test(contrast2, joint = TRUE)
+print(test_rslt)
+
+# use VCOV 
+vcov_rslt <- vcov(contrast2)
+print(vcov_rslt)
+```
+
+# Q3
+
+```{r}
+# Create turkey Pairwise Comparison
+contrast3 <- contrast(rpm_emms,method="tukey",infer=c(T,T))
+contrast3
+
 ```
