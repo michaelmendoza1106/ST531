@@ -6,9 +6,12 @@ editor: visual
 
 # Preliminary Requirements
 
+liters_minute
+
 ```{r}
 # Libraries
 library(emmeans)
+library(ggplot2)
 
 # Copy code from Heart/Lung experiment
 # Create dataframe
@@ -86,4 +89,59 @@ print(vcov_rslt)
 contrast3 <- contrast(rpm_emms,method="tukey",infer=c(T,T))
 contrast3
 
+# since we want r5-r1, we use the logical values in the reversed sign.
+# i.e estimate, lower.CL, Upper.CL should all be * -1
+# Confidence interval (r5=r1) = [2.321,2.467]
 ```
+
+# Q4
+
+```{r}
+
+contrast(rpm_emms,method="dunnett",ref=1,infer=c(T,T))
+# Confidence interval (r5=r1) = [2.321,2.467]
+```
+
+# Q5
+
+```{r}
+# Get SSE for Residuals analysis
+ssE<-anova_rslt$"Sum Sq"[2]
+ssE
+
+# Gives the error DF
+r <- aov_rslt$residuals
+
+n<-nrow(hl_data)
+z<-r/sqrt(ssE/(n-1))
+
+#Constant Variance Plot Check, replace Length with z
+ggplot(hl_data, aes(x = level, y = z, fill = level)) +
+  geom_boxplot() +
+  theme_minimal()
+
+# Constant Variance is likely to be an issue as as there seems to be
+# uneequal spread across variables.
+```
+
+# Q6
+
+```{r}
+#Rule of thumb checking for s^2_max/s^2_min > 3
+vars<-aggregate(liters_minute ~ level, data = hl_data, FUN = var)
+vars
+
+max(vars$liters_minute)/min(vars$liters_minute)
+
+# >3 leads to conclude non-constant variance
+```
+
+# Q7
+
+## A)
+
+There are 2 factors (Battery Duty, Brand) each with 2 levels, resulting in a 2 x 2 factorial design.
+
+## B)
+
+See paper submission.
