@@ -1,0 +1,145 @@
+---
+title: "HW5MMendoza"
+format: pdf
+editor: visual
+---
+
+# Set Up
+
+```{r}
+#load libraries
+library(dplyr)
+library(emmeans)
+
+typevector <- c(1, 2, 1, 4, 1, 1, 2, 3, 4, 2, 2, 3, 4, 3, 4, 3)
+
+data <- data.frame(Type = factor(x = typevector, 
+                                    levels = c(1, 2, 3, 4), 
+                                    labels = c("alkaline, name brand",
+                                                    "alkaline, store brand", 
+                                                    "heavy duty, name brand", 
+                                                    "heavy duty, store brand")
+                                    ),
+                  Time = c(602, 863, 529, 235, 534, 585, 743, 232, 282, 773, 840, 
+                           255, 238, 200, 228, 215),
+                  Cost = c(0.985, 0.935, 0.985, 0.495, 0.985, 0.985, 0.935, 0.520, 
+                           0.495, 0.935, 0.935, 0.520, 0.495, 0.520, 0.495, 0.520),
+                  CostPerUnit = c(611, 923, 537, 476, 542, 593, 794, 445, 569, 827,
+                                  898, 490, 480, 384, 460, 413),
+                  Order = seq(from = 1, to = 16, by = 1)
+                  )
+data <- data |>
+                      mutate(Duty = case_when(
+                        Type %in% c("alkaline, name brand", 
+                                    "alkaline, store brand") ~ "alkaline",
+                        Type %in% c("heavy duty, name brand", 
+                                    "heavy duty, store brand") ~ "heavy duty",
+                        TRUE ~ NA_character_),
+                        Brand = case_when(
+                          Type %in% c("alkaline, name brand", 
+                                      "heavy duty, name brand") ~ "name",
+                          Type %in% c("alkaline, store brand", 
+                                      "heavy duty, store brand") ~ "store",
+                          TRUE ~ NA_character_)
+                          )
+data
+```
+
+# Q1
+
+```{r}
+# Use aggregate to calculate the average value of Life Per Unit Cost for each of 
+# the four treatment combinations
+means <- result <- aggregate(CostPerUnit ~ Type + Brand, 
+                             data = data, 
+                             FUN = mean)
+means
+```
+
+# Q2
+
+```{r}
+# Use interaction.plot to create an interaction plot with Duty on the x-axis 
+# and two lines, one for each Brand
+interaction.plot(
+  x.factor     = data$Duty,        # Variable on the X-axis
+  trace.factor = data$Brand,       # Variable that creates the separate lines
+  response     = data$CostPerUnit,       # Numeric dependent variable (Y-axis)
+  fun          = mean,           # Summary statistic to plot (default is mean)
+  type         = "b",            # "b" plots both points and lines
+  col          = c("blue", "red", "limegreen"), # Colors for the two Brand lines
+  pch          = c(16, 16, 16),      # Point symbols for the lines
+  lty          = 1,              # Line type (solid)
+  lwd          = 5,              # Line width
+  xlab         = "Duty Level",   # X-axis label
+  ylab         = "Mean Cost Per Unit",   # Y-axis label
+  trace.label  = "Brand"         # Title for the legend box
+)
+```
+
+# Q3
+
+See Paper for written answer
+
+# Q4
+
+See Paper for written answer
+
+# Q5
+
+```{r}
+# Duty Simple Effect 
+DutySimple <- means$CostPerUnit[1] - means$CostPerUnit[3]
+DutySimple
+
+# Brand Simple Effect
+BrandSimple <- means$CostPerUnit[2] - means$CostPerUnit[4]
+BrandSimple
+```
+
+# Q6
+
+See Paper for written answer
+
+# Q7
+
+```{r}
+# Duty Main effect
+DutyMain <- (1/2) * means$CostPerUnit[1] + (1/2) * means$CostPerUnit[2] - (1/2) *means$CostPerUnit[3] - (1/2) *means$CostPerUnit[4]
+DutyMain
+```
+
+# Q8
+
+```{r}
+# Use aov()  to fit the effects model with the response “Life per unit cost.” Use 
+# emmeans and contrast to verify your estimates from problems 5 and 7.
+# Fit the two-factor effects model with interaction
+battery_model <- aov(CostPerUnit ~ Duty * Brand, data = data)
+
+# Extract Estimated Marginal Means (Cell Means / Problem 5)
+cell_means <- emmeans(battery_model, ~ Duty * Brand)
+cell_means
+# The estimates are nearly identicaly and very due to rounding.
+
+# Verify the Main Effect of Duty (Problem 7 Contrast)
+# This uses the specific weights [0.5, 0.5, -0.5, -0.5] we defined earlier
+duty_contrast <- contrast(cell_means, method = list(
+  "Main Effect of Duty" = c(0.5, 0.5, -0.5, -0.5)
+))
+duty_contrast
+
+# The Contrast results in nearly the same estimate for the main effect.
+```
+
+# Q9
+
+See Paper for written answer
+
+# Q10
+
+```{r}
+# Use aov and anova to fit the factorial effects model with the response “Life per # unit cost” and produce overall tests for the two main effects and the interaction
+# effects.
+anova(battery_model)
+```
