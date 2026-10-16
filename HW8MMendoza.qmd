@@ -1,0 +1,21 @@
+---
+title: "HW8MMendoza"
+format: pdf
+editor: visual
+---
+
+# Set Up
+
+```{r}
+# call necessary libraries
+library(ggplot2)
+library(emmeans)
+library(tidyverse)
+
+# set seed for replicability
+set.seed(123)
+
+# Call data
+
+
+```

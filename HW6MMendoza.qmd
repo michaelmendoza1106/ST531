@@ -1,0 +1,121 @@
+---
+title: "HW5MMendoza"
+format: pdf
+editor: visual
+---
+
+# Set Up
+
+```{r}
+#load libraries
+library(dplyr)
+library(emmeans)
+
+typevector <- c(1, 2, 1, 4, 1, 1, 2, 3, 4, 2, 2, 3, 4, 3, 4, 3)
+
+data <- data.frame(Type = factor(x = typevector, 
+                                    levels = c(1, 2, 3, 4), 
+                                    labels = c("alkaline, name brand",
+                                                    "alkaline, store brand", 
+                                                    "heavy duty, name brand", 
+                                                    "heavy duty, store brand")
+                                    ),
+                  Time = c(602, 863, 529, 235, 534, 585, 743, 232, 282, 773, 840, 
+                           255, 238, 200, 228, 215),
+                  Cost = c(0.985, 0.935, 0.985, 0.495, 0.985, 0.985, 0.935, 0.520, 
+                           0.495, 0.935, 0.935, 0.520, 0.495, 0.520, 0.495, 0.520),
+                  CostPerUnit = c(611, 923, 537, 476, 542, 593, 794, 445, 569, 827,
+                                  898, 490, 480, 384, 460, 413),
+                  Order = seq(from = 1, to = 16, by = 1)
+                  )
+data <- data |>
+                      mutate(Duty = case_when(
+                        Type %in% c("alkaline, name brand", 
+                                    "alkaline, store brand") ~ "alkaline",
+                        Type %in% c("heavy duty, name brand", 
+                                    "heavy duty, store brand") ~ "heavy duty",
+                        TRUE ~ NA_character_),
+                        Brand = case_when(
+                          Type %in% c("alkaline, name brand", 
+                                      "heavy duty, name brand") ~ "name",
+                          Type %in% c("alkaline, store brand", 
+                                      "heavy duty, store brand") ~ "store",
+                          TRUE ~ NA_character_)
+                          )
+data
+```
+
+aov and anova
+
+```{r}
+# Use aov()  to fit the effects model with the response “Life per unit cost.” Use 
+# emmeans and contrast to verify your estimates from problems 5 and 7.
+# Fit the two-factor effects model with interaction
+battery_model <- aov(CostPerUnit ~ Duty * Brand, data = data)
+
+# Use aov and anova to fit the factorial effects model with the response “Life per # unit cost” and produce overall tests for the two main effects and the interaction
+# effects.
+anova(battery_model)
+```
+
+## Q1)
+
+at alpha = 0.05 the interaction effect significant as Duty:Brand is 0.000558 which is less than the alpha value. this indicates that there is a significant interaction effect.
+
+## Q2)
+
+Because of the interaction effect is sign, a main effect can mask the true relationship and lead to misleading conclusions. Simple efffects would be better when interactive effects are sign.
+
+## Q3)
+
+The code below Estimates the marginal means of costperunit for each treatment combination. It displays the mean difference of duty on each level of brand. The p-value is testing if each sepereate cell mean is statistically different from zero.
+
+```{r}
+# emmeans() on duty/brand interactive effect
+emmeans_inter <- emmeans(battery_model, ~ Duty | Brand)
+emmeans_inter
+```
+
+## Q4)
+
+```{r}
+# contrast of emmeans of interaction effect
+contrast_inter <- contrast(emmeans_inter, method = "pairwise")
+contrast_inter
+```
+
+## Q5)
+
+The function below is estmating the marginal means for each level of Duty regardless of brand. The p-value is testing if the marginal means are different from 0.
+
+```{r}
+# emmeans of main effect of Duty
+emmeans_main <- emmeans(battery_model, ~ Duty)
+emmeans_main
+```
+
+##  Q6)
+
+```{r}
+# contrast of the main effect of Duty
+contrast_main <- contrast(emmeans_main, method = "pairwise")
+contrast_main
+```
+
+## Q7) 
+
+See paper assignment
+
+## Q8)
+
+```{r}
+# aov of main effect of Duty
+battery_main_model <- aov(CostPerUnit ~ Duty + Brand, data)
+
+# Display the ANOVA summary table
+anova(battery_main_model)
+```
+
+## Q9)
+
+see paper assignment

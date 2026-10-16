@@ -1,0 +1,124 @@
+---
+title: "HW7MMendoza"
+format: pdf
+editor: visual
+---
+
+# Set Up
+
+```{r}
+#load libraries
+library(tidyverse)
+library(emmeans)
+library(ggplot2)
+
+#create dataframe from paper towel strength experiment
+#read in .txt file provided on folder via relative path to data folder
+strength_data <- read.table("~/Data/paper.towel.strength.txt", header = TRUE) |>
+                            mutate(A = as.factor(A),
+                                   B = as.factor(B),
+                                   C = as.factor(C)
+                                   )
+strength_data
+```
+
+## Q1)
+
+We mean that this experiment has 3 treatment factors with 2 levels each.
+
+## Q2)
+
+I think I finally figured out latex. Hopefully this looks right
+
+$$Y_{ijkl} = \mu + \tau_i + \beta_j + \gamma_k + (\tau\beta)_{ij} + (\tau\gamma)_{ik} + (\beta\gamma)_{jk} + (\tau\beta\gamma)_{ijk} + \epsilon_{ijkl}$$
+
+for i = 1, 2; j = 1, 2; k= 1, 2; l = 1, 2, 3, and the random error term is assumed to be \~iid normal distribution with a mean of 0 and variance of sigma\^2
+
+## Q3)
+
+```{r}
+#Visualize three-way interaction by creating two interaction plots for each level of power
+
+#Creates side-by-side plots (two columns)
+par(mfrow=c(1,2))
+
+#Power = 1
+indx.p1 <- which(strength_data$C == 1)
+indx.p1
+
+interaction.plot(
+  x.factor     = strength_data$A[indx.p1],  # X-axis factor
+  trace.factor = strength_data$B[indx.p1],  # Factor for distinct lines
+  response     = strength_data$strength[indx.p1],   # Numeric outcome variable
+  fun          = mean,              # Metric to plot (mean, median, etc.)
+  type         = "b",               # "b" plots both points and lines
+  col          = c(1,2,3),# Custom colors
+  pch          = c(16, 16, 16),         # Point shapes
+  lwd          = 5,                 # Line width
+  xlab         = "A",  # X-axis label
+  ylab         = "Strength",    # Y-axis label
+  trace.label  = "C",  # Legend title
+  main         = "Power=1",
+  ylim         = range(strength_data$strength)
+)
+
+
+#Power = 2
+indx.p2 <- which(strength_data$C == 2)
+indx.p2
+
+interaction.plot(
+  x.factor     = strength_data$A[indx.p2],  # X-axis factor
+  trace.factor = strength_data$B[indx.p2],  # Factor for distinct lines
+  response     = strength_data$strength[indx.p2],   # Numeric outcome variable
+  fun          = mean,              # Metric to plot (mean, median, etc.)
+  type         = "b",               # "b" plots both points and lines
+  col          = c(1,2,3),# Custom colors
+  pch          = c(16, 16, 16),         # Point shapes
+  lwd          = 5,                 # Line width
+  xlab         = "A",  # X-axis label
+  ylab         = "Strength",    # Y-axis label
+  trace.label  = "C",  # Legend title
+  main         = "Power=2",
+  ylim         = range(strength_data$strength)
+)
+
+#reset plotting
+par(mfrow=c(1,1))
+```
+
+## Q4)
+
+Since the graphs appear to have similar trends. both have downward slopes and move relatively similar amounts down. Because of this, we expect the three factor interaction to be highly unlikely.
+
+## Q5)
+
+```{r}
+# 1. Initial three way interaction 
+fit.full<-aov(strength~A*B*C,data=strength_data)
+anova(fit.full)
+
+# 2. drop three-way interaction
+fit.2FI<-aov(strength~(A+B+C)^2,data=strength_data)
+anova(fit.2FI)
+
+# 3. remove all insiginificant 2 factor interaction based on alpha = 0.05
+fit.2FI.sub<-aov(strength~A+B+C,data=strength_data)
+anova(fit.2FI.sub)
+
+# 4. remove all insignificant main effects
+fit.2FI.sub.sub<-aov(strength~B+C,data=strength_data)
+anova(fit.2FI.sub.sub)
+```
+
+## Q6)
+
+first, the full three-way interaction analysis was performed. of which, we found a significance for the A : B : C interaction to be insignificant with our alpha level of 0.05. after this, the two factor interactions were analyzed. all of which has significance level \>0.05 by large amounts. as such, these interactions were also dropped. lastly, the individual main effects were analyzed. and only A had a significance level above 0.05. thus, the final model was fit as such below:\
+
+$$ y_{jkR} = \mu + \beta_j + \gamma_k + \varepsilon_{jkR} $$
+
+for j = 1, 2; k = 1, 2 and the random error term is assumed to be \~iid normal distribution with a mean of 0 and variance of sigma\^2
+
+## Q7)
+
+Technically speaking, I believe these all have some level of hidden replication, specifically because each model calculates the main effects, which will average the results across all relevant observations to compare to those of a different level. (i.e., the 12 A=1 average to compare to the 12 A=2 average). However, in the final model fit.2FI.sub.sub, 3 of the hidden replications become explicit replication, resulting in 6 explicit replications. but still results in 12 hidden replicates for main effect.
